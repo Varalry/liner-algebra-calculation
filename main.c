@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 /* run this program using the console pauser or add your own getch, system("pause") or input loop */
 typedef struct matrix{
 	int row;
@@ -12,37 +13,61 @@ char confirm(void);
 int input_number(void);
 void output_matrix(MAT matrix);
 char input_char(void);
+int det_cal(MAT det);
+MAT matrix_multiple(MAT A,MAT B);
+void display(void);
+
 int main(int argc, char *argv[]) {
 	printf("linear algebra calculation\n");
-	//sleep(3);
+	sleep(1);
 	int mode;
+	int det_result;
+	int i;
 	MAT matrix_0,matrix_1,matrix_2;
 	mode = mode_choose();
-	//printf("%d",mode);     //test point1
 	if (!mode){
 		return 0;
 	}
 	switch(mode){
 		case 1:
-			matrix_1 = input_matrix(1);
-			
+			matrix_0 = input_matrix(1);
+			display();
+			det_result = det_cal(matrix_0);
+			printf("%d",det_result);
+			break;
+		case 2:
+			printf("Enter the left one:\n");
+			matrix_1 = input_matrix(2);
+			printf("Enter the right one:\n");
+			matrix_2 = input_matrix(2);
+			display();
+			matrix_0 = matrix_multiple(matrix_1,matrix_2);
+			if(matrix_0.matrix != NULL){
+				output_matrix(matrix_0);
+			}
+			break;	
 	}
 	return 0;
 }
+
+
 int mode_choose(void){
 	int mode;
 	char certain;
 	back_to_mode_choose:
 	printf("Choose a mode:\n");
 	printf("[1]det calculation\n");
+	printf("[2]matrix multiple\n");
 	printf("[0]exit\n\n\n");
-	sleep(3); 
+	sleep(1); 
 	printf("Enter the number befor the mode:\n\n");
 	mode = input_number();
 	getchar();
 	switch(mode){
 		case 1:
 			printf("det calculation?");break;
+		case 2:
+			printf("matrix multiple?");break;
 		default:
 			printf("exit?");break;
 	}
@@ -56,6 +81,7 @@ int mode_choose(void){
 	return mode;
 }
 
+
 MAT input_matrix( int mode ){
 	MAT matrix;
 	char certain;
@@ -68,6 +94,22 @@ MAT input_matrix( int mode ){
 				matrix.column = matrix.row;
 				certain = confirm();
 				}while(certain == 'N');
+			break;
+		case 2:
+			do{
+				printf("Enter a number for rows \n");
+				matrix.row = input_number();
+				getchar();
+				certain = confirm();
+				}while(certain == 'N');
+			do{
+				printf("Enter a number for columns \n");
+				matrix.column = input_number();
+				getchar();
+				certain = confirm();
+			}while(certain == 'N');
+			break;
+
 	}
 	
 	int i,j;
@@ -107,9 +149,10 @@ MAT input_matrix( int mode ){
 		*(p+(x-1)*matrix.row+y-1)= n;
 	}
 	}while(certain == 'R');
-	//sleep(2);
-	
+	sleep(1);
+	return matrix;
 }
+
 
 char confirm(void){
 	char certain;
@@ -117,6 +160,7 @@ char confirm(void){
 	certain = input_char();
 	return certain;
 }
+
 
 int input_number(void){
 	int number;
@@ -127,6 +171,7 @@ int input_number(void){
 	}
 	return number;
 }
+
 
 void output_matrix(MAT matrix){
 	int i,j;
@@ -141,6 +186,7 @@ void output_matrix(MAT matrix){
 	}
 }
 
+
 char input_char(void){
 	char c;
 	while(scanf("%c",&c) == EOF){
@@ -149,4 +195,64 @@ char input_char(void){
 		printf("Enter again.\n");
 	}
 	return c;
+}
+
+int det_cal(MAT det){
+	int sum,i,j,counter;
+	int *p,*q;
+	MAT det_sub;
+	p = det.matrix;
+	if(det.row == 1){
+		return *p;
+	}if(det.row == 2){
+		return (*p * *(p+3) - *(p+1) * *(p+2));
+	}else{
+		sum = 0;
+		det_sub.row = det_sub.column = det.row - 1;
+		for(i = 0;i<det.row;i++){
+			counter = 0;
+			p = (det.matrix+det.row);
+			det_sub.matrix = (int*)malloc((det.row)*(det.column)*sizeof(int));
+			q = det_sub.matrix;
+			for(j = 0;j<det_sub.row*det_sub.column;j++){
+				if(counter%det.row == i){
+					p++;
+					counter++;
+				}
+				*q = *p;
+				q++;
+				p++;
+				counter++;
+			}
+			p = det.matrix;
+			output_matrix( det_sub );
+			sum = sum + *(p+i) * pow(-1,i) * det_cal( det_sub );
+			q = det_sub.matrix;
+			free(q);
+		}
+		return sum;
+	}
+}
+
+void display(void){
+	int i;
+	printf("Calculating");
+			for(i=0;i<3;i++){
+				sleep(1);
+				printf(".");
+			}
+			printf("\n");
+}
+
+MAT matrix_multiple(MAT A,MAT B){
+	MAT result;
+	if(A.column != B.row){
+		printf("Invalid input!");
+		result.row = result.column = -1;
+		result.matrix = NULL;
+	}else{
+		;
+	}
+	return result;
+	
 }
